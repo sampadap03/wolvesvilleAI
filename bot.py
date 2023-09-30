@@ -1,5 +1,7 @@
+from discord.ext.commands import Bot as bot
 import discord
 import responses
+import json
 
 async def send_message(message, user_message, is_private):
     try:
@@ -9,32 +11,30 @@ async def send_message(message, user_message, is_private):
     except Exception as e:
         print(e)
 
-def run_discord_bot():
-    TOKEN = "MTE1NTQ1ODg2NjM3NzY1ODQ2OA.GTJ4Ml.MSpHXmq946wbroHZuhnz502TiGGgUM5zX9ChAg"
+
+def get_token():
+    with open('config.json', 'r') as myfile:
+        data=myfile.read()
+    
+    return json.loads(data)["TOKEN"]
+
+
+async def run_discord_bot():
+    token = get_token()
+
+    discord.utils.setup_logging()
     intents = discord.Intents.default()
     intents.message_content = True
-    client = discord.Client(intents=intents)
+
+    client = bot(command_prefix=".", intents=intents)
+
 
     @client.event
     async def on_ready():
         print(f'{client.user} is now running')
 
-    @client.event
-    async def on_message(message):
-        if message.author == client.user:
-            return
-        
-        username = str(message.author)
-        user_message = str(message.content)
-        channel = str(message.channel)
-
-        print(f'{username} said: "{user_message}" ({channel})')
-
-        if user_message[0] == '?':
-            user_message = user_message[1:]
-            await send_message(message, user_message, is_private=True)
-        else:
-            await send_message(message, user_message, is_private=False)
-            
-    client.run(TOKEN)
-
+    async with client:
+        await client.load_extension("cogs.common")
+        await client.load_extension("cogs.clan")
+       
+        await client.start(token)

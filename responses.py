@@ -7,7 +7,7 @@ def get_response(message: str) -> str:
         return "Hey there!"
     
     if message == "roll":
-        return str(random.randint((1, 6)))
+        return str(random.randint(1, 6))
     
     if p_message == "help":
         return "this is help"
